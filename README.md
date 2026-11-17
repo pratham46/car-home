@@ -4,8 +4,16 @@ A lightweight launcher for Android car head units (built for a 1024×600, 2 GB, 
 "YT9216CJ" unit in a Maruti Suzuki SX4). Plain Java, no libraries, no image assets — about 35 KB,
 ~35 MB of RAM.
 
-**Download:** see [Releases](../../releases) — `CarHome.apk`, plus DiPlay (CarPlay) and
-Open Headunit (Android Auto) for a one-stop install.
+## Download
+
+| | APK | |
+|---|---|---|
+| **Car Home** (this launcher) | [⬇ CarHome.apk](https://github.com/pratham46/car-home/releases/latest/download/CarHome.apk) | 36 KB |
+| **CarPlay** — DiPlay 0.2.22 | [⬇ DiPlay-0.2.22.apk](https://github.com/pratham46/car-home/releases/latest/download/DiPlay-0.2.22.apk) | 18 MB |
+| **Android Auto** — Open Headunit 4.0.0 | [⬇ OpenHeadUnit-4.0.0.apk](https://github.com/pratham46/car-home/releases/latest/download/OpenHeadUnit-4.0.0.apk) | 20 MB |
+
+All files and notes: [Releases](https://github.com/pratham46/car-home/releases). DiPlay and Open Headunit
+are other authors' apps, unmodified — see [THIRD_PARTY.md](THIRD_PARTY.md).
 
 ## Features
 
