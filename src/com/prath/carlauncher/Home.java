@@ -411,7 +411,11 @@ public class Home extends Activity implements LocationListener {
 
     // Names the unit's own camera / AV-in screens tend to have (firmware differs per unit).
     static final java.util.regex.Pattern CAMERA_NAMES = java.util.regex.Pattern.compile(
-            "(?i)revers|rear|back.?car|backview|parking|avin|av.?in|aux.?in|camera|cam360|360|dvr");
+            "(?i)revers|rear|back.?car|backview|parking|avin|av.?in|aux.?in|camera|cam360|360");
+    // Dash-cam / recorder apps also match "camera" but can grab the whole screen (seen on the
+    // YT9216CJ: its DVR app blocked all touch until a restart), so they're never offered.
+    static final java.util.regex.Pattern NOT_CAMERA = java.util.regex.Pattern.compile(
+            "(?i)dvr|dash.?cam|recorder|record");
 
     View cameraButton() {
         LinearLayout b = roundButton(Glyph.CAMERA, "CAMERA", v -> openCamera());
@@ -422,14 +426,13 @@ public class Home extends Activity implements LocationListener {
     /** Tap: open the remembered camera screen; first time, find it (one match opens, several → list). */
     void openCamera() {
         String saved = prefs.getString("camera", null);
-        if (saved != null && launchComponent(saved)) return;
-        List<String[]> found = cameraCandidates();
-        if (found.size() == 1) {
-            prefs.edit().putString("camera", found.get(0)[1]).apply();
-            launchComponent(found.get(0)[1]);
-        } else {
-            pickCamera(found);
+        if (saved != null && NOT_CAMERA.matcher(saved).find()) { // remembered from an older version
+            prefs.edit().remove("camera").apply();
+            saved = null;
         }
+        if (saved != null && launchComponent(saved)) return;
+        // never auto-open an unknown screen: always let the driver confirm the first time
+        pickCamera(cameraCandidates());
     }
 
     /** {label, "pkg/activity"}: launcher apps whose name looks like a camera, then hidden exported screens. */
@@ -438,7 +441,8 @@ public class Home extends Activity implements LocationListener {
         java.util.Set<String> seen = new java.util.HashSet<>();
         for (App a : apps()) {
             String cls = a.ri.activityInfo.name;
-            if (CAMERA_NAMES.matcher(a.label + " " + a.pkg + " " + cls).find() && seen.add(a.pkg + "/" + cls))
+            String all = a.label + " " + a.pkg + " " + cls;
+            if (CAMERA_NAMES.matcher(all).find() && !NOT_CAMERA.matcher(all).find() && seen.add(a.pkg + "/" + cls))
                 out.add(new String[]{a.label, a.pkg + "/" + cls});
         }
         try { // ponytail: one-off scan of every app's screens; only runs when the user asks for the camera
@@ -447,8 +451,9 @@ public class Home extends Activity implements LocationListener {
                 for (android.content.pm.ActivityInfo ai : p.activities) {
                     String simple = ai.name.substring(ai.name.lastIndexOf('.') + 1);
                     if (!ai.exported || !CAMERA_NAMES.matcher(simple).find()) continue;
-                    if (!seen.add(p.packageName + "/" + ai.name)) continue;
                     String app = String.valueOf(p.applicationInfo.loadLabel(pm));
+                    if (NOT_CAMERA.matcher(app + " " + p.packageName + " " + ai.name).find()) continue;
+                    if (!seen.add(p.packageName + "/" + ai.name)) continue;
                     out.add(new String[]{app + "  ·  " + simple, p.packageName + "/" + ai.name});
                 }
             }
