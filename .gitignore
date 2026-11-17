@@ -1,0 +1,12 @@
+# build output
+out/
+*.apk
+# signing key: keep it off GitHub
+debug.keystore
+# emulator-only test app, iPhone app (not part of this repo)
+testplayer/
+ios/
+# lights-probe snapshots
+tools/probe/
+*.idsig
+bundle/SHA256SUMS.txt
