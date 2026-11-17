@@ -209,13 +209,17 @@ public class Home extends Activity implements LocationListener {
 
     void buildUi() {
         frame.removeAllViews();
-        getWindow().setStatusBarColor(P.bg1);
-        getWindow().getDecorView().setSystemUiVisibility(P.dark ? 0 : View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        // The unit's top bar (clock, home, back) floats over us like on the stock launcher:
+        // we draw underneath it; a light tint keeps its white icons readable in day mode.
+        getWindow().setStatusBarColor(P.dark ? 0x00000000 : 0x40000000);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
         LinearLayout home = new LinearLayout(this);
         home.setOrientation(LinearLayout.VERTICAL);
         home.setBackground(backdrop());
-        home.setPadding(px(8), px(6), px(8), px(4));
+        // cards start just under the bar; their soft-shadow margin (11dp) may sit beneath it
+        home.setPadding(px(8), Math.max(px(6), statusBarHeight() - px(8)), px(8), px(4));
 
         LinearLayout top = new LinearLayout(this);
         top.addView(speedCard(), new LinearLayout.LayoutParams(px(290), -1));
@@ -229,7 +233,7 @@ public class Home extends Activity implements LocationListener {
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setBackground(backdrop());
-        panel.setPadding(px(8), px(4), px(8), 0);
+        panel.setPadding(px(8), statusBarHeight(), px(8), 0);
         LinearLayout header = new LinearLayout(this);
         header.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout back = new LinearLayout(this);
@@ -258,6 +262,11 @@ public class Home extends Activity implements LocationListener {
         updateMedia();
         renderSpeed(false);
         refreshMeters();
+    }
+
+    int statusBarHeight() {
+        int id = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        return id > 0 ? getResources().getDimensionPixelSize(id) : px(24);
     }
 
     GradientDrawable backdrop() {
